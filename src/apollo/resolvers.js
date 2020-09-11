@@ -14,7 +14,8 @@ const resolvers = {
     users: () => users,
     users: (_, __, { user }) => {
       if (!user) throw new AuthenticationError("Not Authenticated");
-      if (!user.roles.includes("admin")) throw new ForbiddenError("Not Authorized");
+      if (!user.roles.includes("admin"))
+        throw new ForbiddenError("Not Authorized");
 
       return users;
     },
@@ -39,7 +40,7 @@ const resolvers = {
       return newMovie;
     },
     signup: (_, { name, ID, password }) => {
-      if (users.find((user) => user.ID === ID)) return false;
+      if (users.find((user) => user.ID === ID)) return false; // 중복 ID일 때
 
       bcrypt.hash(password, 10, function (err, passwordHash) {
         const newUser = {
