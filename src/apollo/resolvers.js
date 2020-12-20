@@ -11,7 +11,6 @@ const resolvers = {
     movie: (_, { id }) => {
       return movies.filter((movie) => movie.id === id)[0];
     },
-    users: () => users,
     users: (_, __, { user }) => {
       if (!user) throw new AuthenticationError("Not Authenticated");
       if (!user.roles.includes("admin"))
@@ -39,14 +38,17 @@ const resolvers = {
       movies.push(newMovie);
       return newMovie;
     },
-    signup: (_, { name, ID, password }) => {
-      if (users.find((user) => user.ID === ID)) return false; // 중복 ID일 때
+    register: (_, { name, email, password }) => {
+      // 중복 ID일 때
+      if (users.find((user) => user.email === email)) {
+        return false;
+      }
 
-      bcrypt.hash(password, 10, function (err, passwordHash) {
+      bcrypt.hash(password, 10, (err, passwordHash) => {
         const newUser = {
           id: users.length + 1,
           name,
-          ID,
+          email,
           passwordHash,
           role: ["user"],
           token: "",
@@ -56,24 +58,21 @@ const resolvers = {
 
       return true;
     },
-    login: (_, { ID, password }) => {
-      const user = users.find((user) => user.ID === ID);
+    login: (_, { email, password }) => {
+      const user = users.find((user) => user.email === email);
 
       if (!user) return null; // 해당 ID가 없을 때
       if (user.token) return null; // 해당 ID로 이미 로그인되어 있을 때
       if (!bcrypt.compareSync(password, user.passwordHash)) return null; // 비밀번호가 일치하지 않을 때
 
-      user.token = sha256(rand(160, 36) + ID + password).toString();
+      user.token = sha256(rand(160, 36) + email + password).toString();
       return user;
     },
     logout: (_, __, { user }) => {
-      if (user?.token) {
-        // 로그인 상태라면(토큰이 존재하면)
-        user.token = "";
-        return true;
-      }
-
-      throw new AuthenticationError("Not Authenticated"); // 로그인되어 있지 않거나 로그인 토큰이 없을 때
+      if (!user) throw new AuthenticationError("Not Authenticated"); 
+      
+      user.token = "";
+      return true;
     },
   },
 };
