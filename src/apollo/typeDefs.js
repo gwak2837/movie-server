@@ -3,11 +3,11 @@ import { gql } from "apollo-server";
 const typeDefs = gql`
   type User {
     id: Int!
-    name: String
-    ID: String!
-    passwordHash: String
+    name: String!
+    email: String!
+    passwordHash: String!
     role: [String!]!
-    token: String
+    token: String!
   }
 
   type Movie {
@@ -20,14 +20,14 @@ const typeDefs = gql`
     movies: [Movie!]!
     movie(id: Int!): Movie
     users: [User]!
-    me: User!
+    me: User
   }
 
   type Mutation {
     addMovie(name: String!, rating: Int!): Movie!
-    addUser(ID: String!, password: String!): User
-    signup(name: String!, ID: String!, password: String!): Boolean!
-    login(ID: String!, password: String!): User
+    addUser(email: String!, password: String!): User
+    register(name: String!, email: String!, password: String!): Boolean!
+    login(email: String!, password: String!): User
     logout: Boolean!
   }
 `;
